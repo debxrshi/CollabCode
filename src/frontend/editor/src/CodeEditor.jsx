@@ -1,56 +1,54 @@
-import { useState, useRef ,useEffect} from "react";
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from 'react-router-dom';
 import { Editor } from "@monaco-editor/react";
 import Swal from 'sweetalert2';
 import Terminal from "./Terminal";
 
 function CodeEditor() {
-    const navigate=useNavigate()
+    const navigate = useNavigate();
     const editorRef = useRef(null);
     const [code, setCode] = useState('');
     const [id, setId] = useState('');
     const [language, setLanguage] = useState('javascript');
     const [output, setOutput] = useState("");
     const [time, setTime] = useState("");
-    const{uuid}=useParams()
-    const[key,setKey]=useState(localStorage.getItem("key"))
+    const { uuid } = useParams();
+    const [key, setKey] = useState(localStorage.getItem("key"));
 
     useEffect(() => {
         if (!uuid || !key) {
-          navigate("/");
+            navigate("/");
+        } else {
+            fetch(`http://192.168.1.4:8080/api/joinRoom?uuid=${uuid}&roomKey=${key}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    navigate('/');
+                }
+            }).then(data => {
+                setLanguage(data.lang);
+                setId(data.id);
+                setCode(data.code);
+            }).catch(error => {
+                console.error(error);
+                navigate('/');
+            });
         }
-        else {
-          fetch(`http://192.168.1.4:8080/api/joinRoom?uuid=${uuid}&roomKey=${key}`, {
-                            method: 'GET',
-                            headers: {
-                            'Content-Type': 'application/json'
-                            },
-                        }).then(response => {
-                            if (response.ok) {
-                                return response.json();
-                            } else {
-                                navigate('/')
-                            }
-                        })
-                            .then(data1 => {
-                                setLanguage(data1.lang)
-                                setId(data1.id)
-                                setCode(data1.code)
-                                console.log(data1)
-                                
-                            })
-        }
-
-        
-    }, [])
+    }, [uuid, key, navigate]);
 
     function handleEditorDidMount(editor, monaco) {
         editorRef.current = editor;
         const socket = new WebSocket(`ws://192.168.1.4:8080/websocket/${uuid}`);
+
         socket.onopen = () => {
             console.log("WebSocket connection opened");
         };
-        
+
         socket.onclose = () => {
             console.log("WebSocket connection closed");
         };
@@ -61,7 +59,6 @@ function CodeEditor() {
             if (!isLocalChange) {
                 const value = editor.getValue();
                 socket.send(value);
-
             }
         });
 
@@ -75,6 +72,7 @@ function CodeEditor() {
 
             editor.setSelection(selection);
         };
+
         return () => {
             socket.close();
         };
@@ -83,9 +81,10 @@ function CodeEditor() {
     const getEditorValue = () => {
         console.log(editorRef.current.getValue());
     }
+
     const handleLanguageChange = (event) => {
         setLanguage(event.target.value);
-        setCode(''); 
+        setCode('');
     };
 
     const runCode = () => {
@@ -98,76 +97,78 @@ function CodeEditor() {
                 Swal.showLoading();
                 const timer = Swal.getPopup().querySelector("b");
                 timerInterval = setInterval(() => {
-                timer.textContent = `${Swal.getTimerLeft()}`;
+                    timer.textContent = `${Swal.getTimerLeft()}`;
                 }, 100);
             },
             willClose: () => {
                 clearInterval(timerInterval);
             }
         });
-    
-        var codes = editorRef.current.getValue()
-        const obj = { code: codes, lang: language }
-        console.log(language)
-        setOutput("")
-        setTime("")
+
+        const codes = editorRef.current.getValue();
+        const obj = { code: codes, lang: language };
+        setOutput("");
+        setTime("");
         fetch('http://192.168.1.4:8080/api/exec', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(obj)
-    
         }).then(response => response.json())
             .then(data => {
-                setOutput(data.out)
-                setTime(data.tte)
-                Swal.close(); 
-            }).catch(error => {
-                console.error(error)
+                setOutput(data.out);
+                setTime(data.tte);
                 Swal.close();
-            })
+            }).catch(error => {
+            console.error(error);
+            Swal.close();
+        });
     };
-    const saveCode=()=>{
+
+    const saveCode = () => {
         fetch('http://192.168.1.4:8080/api/saveState', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({id:id,lang:language,code:editorRef.current.getValue(),uuid:uuid,roomKey:key})
-
+            body: JSON.stringify({ id: id, lang: language, code: editorRef.current.getValue(), uuid: uuid, roomKey: key })
         }).then(response => {
-            if(response.ok){
+            if (response.ok) {
                 Swal.fire({
                     title: "Saved",
-                    background:'black',
+                    background: 'black',
                     showClass: {
-                      popup: `
-                        animate__animated
-                        animate__fadeInUp
-                        animate__faster
-                      `
+                        popup: `
+                            animate__animated
+                            animate__fadeInUp
+                            animate__faster
+                        `
                     },
                     hideClass: {
-                      popup: `
-                        animate__animated
-                        animate__fadeOutDown
-                        animate__faster
-                      `
+                        popup: `
+                            animate__animated
+                            animate__fadeOutDown
+                            animate__faster
+                        `
                     }
-                  });
-            }
-            else{
+                });
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: 'Failed to save code. Please try again later.'
                 });
             }
-        })
-            
-    }
-
+        }).catch(error => {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to save code. Please try again later.'
+            });
+        });
+    };
     return (
         <>
             <div className="flex justify-between pb-3" style={{backgroundColor:'rgb(22,22,22)'}}>
