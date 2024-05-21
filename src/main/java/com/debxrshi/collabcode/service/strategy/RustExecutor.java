@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Component
+@Component("rust")
 public class RustExecutor implements  CodeExecutionStrategy {
 
     @Override

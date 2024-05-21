@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Component
+@Component("go")
 public class GoExecutor implements CodeExecutionStrategy {
 
     @Override

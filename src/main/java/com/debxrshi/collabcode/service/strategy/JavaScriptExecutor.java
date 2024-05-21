@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 
-@Component
+@Component("javascript")
 public class JavaScriptExecutor implements CodeExecutionStrategy {
 
     @Override

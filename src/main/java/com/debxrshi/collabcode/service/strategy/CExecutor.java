@@ -8,7 +8,7 @@ import com.debxrshi.collabcode.model.ExecResult;
 import com.debxrshi.collabcode.service.util.ProcessOutputReader;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("c")
 public class CExecutor implements CodeExecutionStrategy {
 
     @Override

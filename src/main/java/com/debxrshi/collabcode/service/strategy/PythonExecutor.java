@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Component
+@Component("python")
 public class PythonExecutor implements CodeExecutionStrategy{
 
     @Override
