@@ -16,7 +16,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
         String roomId = getRoomId(session);
         if (roomId != null) {
-            roomSessions.forEach((key, value) -> System.out.println("Key = " + key + ", Value = " + value));
             roomSessions.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);
         }
     }
