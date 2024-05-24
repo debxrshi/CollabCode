@@ -1,12 +1,14 @@
 package com.debxrshi.collabcode.service.util;
 
+import com.debxrshi.collabcode.model.ExecResult;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-public class ProcessOutputReader{
+public class ContainerManager {
 
-    public static String readOut(Process process, String containerName){
-    
+    public static String readOut(Process process, String containerName) {
+
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder sb = new StringBuilder();
@@ -26,17 +28,39 @@ public class ProcessOutputReader{
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    } 
-    
-    public static void terminateContainer(String containerName){
-        
+    }
+
+    public static void terminateContainer(String containerName) {
+
         try {
             ProcessBuilder pb = new ProcessBuilder()
-            .command("docker","rm","-f",containerName);
+                    .command("docker", "rm", "-f", containerName);
             Process p = pb.start();
             p.destroy();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public static ExecResult initContainer(ProcessBuilder pb, String containerName, ExecResult result) {
+
+        try {
+            Process p = pb.start();
+            long startTime = System.currentTimeMillis();
+            String output = readOut(p, containerName);
+            long endTime = System.currentTimeMillis();
+            float time = (float) (endTime - startTime) / 1000;
+            if (output.contains("Killed")) {
+                result.setOut("Your code took too long to execute!");
+                result.setTte(time);
+            } else {
+                result.setOut(output.trim());
+                result.setTte(time);
+            }
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
+
 }

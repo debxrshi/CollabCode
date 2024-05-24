@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 public class RoomController {
 
-
     @Autowired
     private RoomRepository roomRepository;
 
