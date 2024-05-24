@@ -15,7 +15,6 @@ public class ExecutionController {
     @Autowired
     private CodeExecutorImpl codeExecutor ;
 
-
     @PostMapping(value = "/exec", produces = "application/json", consumes = "application/json")
     public ExecResult executeCode(@RequestBody Code code) {
         return codeExecutor.codeExecutor(code);
