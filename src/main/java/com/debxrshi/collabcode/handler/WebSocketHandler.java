@@ -17,15 +17,11 @@ import java.util.Set;
 @Service
 public class WebSocketHandler extends TextWebSocketHandler {
 
-    private static final Map<String, Set<WebSocketSession>> roomSessions = new HashMap<>();
-
-    private final RoomRepository roomRepository;
 
     @Autowired
-    public WebSocketHandler(RoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
-    }
-
+    private RoomRepository roomRepository;
+    private static final Map<String, Set<WebSocketSession>> roomSessions = new HashMap<>();
+    
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         try {
