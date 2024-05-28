@@ -53,10 +53,10 @@ function CodeEditor() {
             console.log("WebSocket connection closed");
         };
 
-        let isLocalChange = false;
+        let isReceivedChanged = false;
 
         editor.onDidChangeModelContent(() => {
-            if (!isLocalChange) {
+            if (!isReceivedChanged) {
                 const value = editor.getValue();
                 socket.send(value);
             }
@@ -66,9 +66,9 @@ function CodeEditor() {
             const content = event.data;
             const selection = editor.getSelection();
 
-            isLocalChange = true;
+            isReceivedChanged = true;
             editor.setValue(content);
-            isLocalChange = false;
+            isReceivedChanged = false;
 
             editor.setSelection(selection);
         };
@@ -76,10 +76,6 @@ function CodeEditor() {
         return () => {
             socket.close();
         };
-    }
-
-    const getEditorValue = () => {
-        console.log(editorRef.current.getValue());
     }
 
     const handleLanguageChange = (event) => {

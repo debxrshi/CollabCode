@@ -3,6 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 
+
+
+
 function PopUp({ onClose, textValue ,type}) {
   const [borderColor, setBorderColor] = useState('border-blue-500');
   const [fontColor, setFontColor] = useState();
