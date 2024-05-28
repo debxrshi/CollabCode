@@ -26,7 +26,8 @@ public class ContainerManager {
             terminateContainer(containerName);
             return sb.toString();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return "Error encountered during exection";
         }
     }
 
@@ -59,7 +60,10 @@ public class ContainerManager {
             }
             return result;
         } catch (Exception e) {
-            throw new RuntimeException();
+            e.printStackTrace();
+            result.setOut("Error encountered during execution");
+            result.setTte(0.00F);
+            return result;
         }
     }
 

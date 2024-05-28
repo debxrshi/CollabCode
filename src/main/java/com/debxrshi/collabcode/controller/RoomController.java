@@ -5,6 +5,7 @@ import com.debxrshi.collabcode.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -17,13 +18,13 @@ public class RoomController {
     private RoomRepository roomRepository;
 
     @PostMapping(value = "/createRoom", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Object> createRoom(@RequestBody Room room){
+    public ResponseEntity<Object> createRoom(@Validated @RequestBody Room room){
         roomRepository.save(room);
         return ResponseEntity.status(HttpStatus.OK).body("Room Created!");
     }
 
     @GetMapping(value = "/joinRoom", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Object> joinRoom(@RequestParam String uuid, String roomKey) {
+    public ResponseEntity<Object> joinRoom(@Validated @RequestParam String uuid, String roomKey) {
         Room roomObj = roomRepository.findByUuidAndRoomKey(uuid, roomKey);
         if (roomObj != null) {
             return ResponseEntity.status(HttpStatus.OK).body(roomObj);

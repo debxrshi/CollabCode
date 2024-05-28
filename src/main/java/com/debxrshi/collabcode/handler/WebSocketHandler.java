@@ -1,41 +1,63 @@
 package com.debxrshi.collabcode.handler;
 
-
+import com.debxrshi.collabcode.model.Room;
+import com.debxrshi.collabcode.repository.RoomRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+@Service
 public class WebSocketHandler extends TextWebSocketHandler {
 
     private static final Map<String, Set<WebSocketSession>> roomSessions = new HashMap<>();
 
+    private final RoomRepository roomRepository;
+
+    @Autowired
+    public WebSocketHandler(RoomRepository roomRepository) {
+        this.roomRepository = roomRepository;
+    }
+
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        String roomId = getRoomId(session);
-        if (roomId != null) {
-            roomSessions.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);
+        try {
+            String roomId = getRoomId(session);
+            Room room = roomRepository.findByUuid(roomId);
+            if (room != null) {
+                roomSessions.computeIfAbsent(roomId, k -> new HashSet<>()).add(session);
+            } else {
+                session.close(CloseStatus.NOT_ACCEPTABLE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
-        String roomId = getRoomId(session);
-        if (roomId != null) {
-            Set<WebSocketSession> sessions = roomSessions.get(roomId);
-            if (sessions != null) {
-                for (WebSocketSession webSocketSession : sessions) {
-                    if (webSocketSession.isOpen()) {
-                        try {
+        try {
+            String roomId = getRoomId(session);
+            if (roomId != null) {
+                Set<WebSocketSession> sessions = roomSessions.get(roomId);
+                if (sessions != null) {
+                    for (WebSocketSession webSocketSession : sessions) {
+                        if (webSocketSession.isOpen()) {
                             webSocketSession.sendMessage(textMessage);
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
                     }
                 }
             }
+        } catch (Exception e) {
+            System.out.println("Failed to send message");
+            e.printStackTrace();
         }
     }
 
@@ -56,6 +78,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private String getRoomId(WebSocketSession session) {
         String uri = session.getUri().toString();
         String[] parts = uri.split("/");
-        return parts[parts.length - 1];
+        return parts.length > 1 ? parts[parts.length - 1] : null;
     }
 }

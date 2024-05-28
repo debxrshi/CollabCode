@@ -1,6 +1,7 @@
 package com.debxrshi.collabcode.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "Rooms")
@@ -9,7 +10,8 @@ public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(name = "uuid", unique = true)
+
+    @Column(name = "uuid", unique = true, nullable = false)
     private String uuid;
 
     @Column(name = "code", columnDefinition = "text")
@@ -18,7 +20,7 @@ public class Room {
     @Column(name = "lang")
     private String lang;
 
-    @Column(name = "roomKey")
+    @Column(name = "roomKey", nullable = false)
     private String roomKey;
 
     public String getRoomKey() {

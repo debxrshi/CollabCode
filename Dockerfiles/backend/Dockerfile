@@ -1,0 +1,2 @@
+FROM openjdk:latest
+
